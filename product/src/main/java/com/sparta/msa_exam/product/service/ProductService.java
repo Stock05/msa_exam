@@ -6,6 +6,9 @@ import com.sparta.msa_exam.product.entity.Product;
 import com.sparta.msa_exam.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class ProductService {
 
@@ -20,5 +23,9 @@ public class ProductService {
         Product saveProduct =productRepository.save(product);
         ProductResponseDto productResponseDto = new ProductResponseDto(saveProduct);
         return productResponseDto;
+    }
+
+    public List<ProductResponseDto> findAllProducts() {
+        return productRepository.findAll().stream().map(ProductResponseDto::new).toList();
     }
 }
