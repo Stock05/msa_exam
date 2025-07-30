@@ -9,7 +9,6 @@ import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @Table(name = "product") // 매핑할 테이블의 이름을 지정
 @NoArgsConstructor
 public class Product {
