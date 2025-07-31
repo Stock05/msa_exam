@@ -5,6 +5,7 @@ import com.sparta.msa_exam.order.dto.OrderRequestDto;
 import com.sparta.msa_exam.order.dto.OrderResponseDto;
 import com.sparta.msa_exam.order.entity.Order;
 
+import com.sparta.msa_exam.order.entity.OrderItem;
 import com.sparta.msa_exam.order.repository.OrderRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +41,27 @@ public class OrderService {
     public OrderResponseDto fallbackCheckProductStock(OrderRequestDto requestDto, Throwable t) {
         log.error("checkProductStock {}", t.getMessage());
         return new OrderResponseDto("잠시 후에 주문 추가를 요청 해주세요");
+    }
+
+    public OrderResponseDto updateOrder(Long orderId, OrderRequestDto requestDto) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Product not found with id " + orderId));
+        requestDto.getProduct_ids().forEach(productId -> {
+            try{productClient.getProduct(productId);}
+            catch (Exception e) {
+                log.error("Exception: ", e);
+                throw new RuntimeException(e);
+
+            }
+
+                    OrderItem orderItem = new OrderItem(productId, order);
+                    order.getOrderItems().add(orderItem);
+        });
+        orderRepository.save(order);
+        return new OrderResponseDto(order);
+    }
+
+    public OrderResponseDto findOrderById(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Order not found with id " + orderId));
+        return new OrderResponseDto(order);
     }
 }

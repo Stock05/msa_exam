@@ -21,6 +21,18 @@ public class OrderController {
         return orderService.createOrder(requestDto);
     }
 
+    @PutMapping("/{orderId}")
+    public OrderResponseDto updateOrder(@PathVariable Long orderId, @RequestBody OrderRequestDto requestDto){
+        return orderService.updateOrder(orderId,requestDto);
+    }
+
+    @GetMapping("/{orderId}")
+    public OrderResponseDto findOrderById(@PathVariable Long orderId){
+        return orderService.findOrderById(orderId);
+    }
+
+
+
 
 
 
