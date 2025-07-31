@@ -25,4 +25,11 @@ public class ProductService {
     public List<ProductResponseDto> findAllProducts() {
         return productRepository.findAll().stream().map(ProductResponseDto::new).toList();
     }
+
+    public ProductResponseDto findProductById(Long id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found with id " + id));
+        return new ProductResponseDto(product);
+    }
+
+
 }
