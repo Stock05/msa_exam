@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -18,7 +19,7 @@ import javax.crypto.SecretKey;
 
 @Slf4j
 @Component
-public class LocalJwtAuthenticationFilter implements GlobalFilter {
+public class LocalJwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Value("${service.jwt.secret-key}")
     private String secretKey;
@@ -37,7 +38,7 @@ public class LocalJwtAuthenticationFilter implements GlobalFilter {
         if (token == null || !validateToken(token)) {
             log.info("LocalJwtAuthenticationFilter - Token validation failed.");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            return Mono.empty();
         }
         log.info("LocalJwtAuthenticationFilter - Token validated.");
 
@@ -65,5 +66,10 @@ public class LocalJwtAuthenticationFilter implements GlobalFilter {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }
