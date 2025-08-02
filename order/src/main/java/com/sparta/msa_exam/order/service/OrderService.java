@@ -10,6 +10,7 @@ import com.sparta.msa_exam.order.repository.OrderRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 
@@ -60,6 +61,7 @@ public class OrderService {
         return new OrderResponseDto(order);
     }
 
+    @Cacheable(value = "orders", key = "#orderId", cacheManager = "cacheManager")
     public OrderResponseDto findOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Order not found with id " + orderId));
         return new OrderResponseDto(order);
