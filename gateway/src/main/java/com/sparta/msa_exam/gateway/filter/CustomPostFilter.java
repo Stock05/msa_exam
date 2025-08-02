@@ -16,7 +16,14 @@ public class CustomPostFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         log.info("Post Filter : Request URI: {}", request.getURI());
-        return chain.filter(exchange).then(Mono.fromRunnable(() -> {addServerPortHeader(exchange, request);}));
+        return chain.filter(exchange).then(Mono.fromRunnable(() -> {
+            // Check if Server-Port header already exists from downstream service
+            String serverPort = exchange.getResponse().getHeaders().getFirst("server-port");
+            if (serverPort == null) {
+                // If not, add the gateway's port
+                exchange.getResponse().getHeaders().add("server-port", String.valueOf(request.getLocalAddress().getPort()));
+            }
+        }));
     }
 
     @Override
@@ -24,8 +31,5 @@ public class CustomPostFilter implements GlobalFilter, Ordered {
         return Ordered.HIGHEST_PRECEDENCE;
     }
 
-    private void addServerPortHeader(ServerWebExchange exchange, ServerHttpRequest request) {
-        exchange.getResponse().getHeaders().add("server-port", request.getLocalAddress().getPort() + "");
-
-    }
+    
 }
